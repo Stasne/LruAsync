@@ -35,6 +35,26 @@ void RunWorkers(int n, const Fn& fn)
     for (auto& t : workers)
         t.join();
 }
+void DoubleBeginTest()
+{
+    DummyData            d1(1);
+    DummyData            d2(2);
+    DummyData            d3(3);
+    std::list<DummyData> srclist;
+    srclist.push_front(d3);
+    srclist.push_front(d2);
+
+    std::list<DummyData> list;
+    list.push_front(d1);
+    auto it1 = list.begin();
+
+    list.splice(it1, list, srclist.begin());
+    list.splice(it1, list, srclist.begin());
+
+    std::cout << "splice result\n";
+    for (auto& dum : list)
+        std::cout << dum.val << " ";
+}
 
 int main(int argc, char** argv)
 {

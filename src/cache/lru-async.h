@@ -15,7 +15,7 @@ class LruAsync
     using data_list_it_t = typename std::list<key_data_t>::iterator;
 
 public:
-    LruAsync(size_t capacity)
+    explicit LruAsync(size_t capacity)
         : capacity_(capacity)
     {
     }
@@ -40,7 +40,7 @@ public:
 
     cache_data_t get(const key_t& key) &
     {
-        std::lock_guard<std::mutex> lk(m_);
+        std::lock_guard<std::mutex> lk(m_); //? (if no mtx - LRU is broken, but cache stll works)
 
         auto dataIt = hash_.find(key);
         if (dataIt == hash_.cend())
@@ -49,19 +49,19 @@ public:
         data_.splice(data_.begin(), data_, dataIt->second);
         return dataIt->second->second;
     }
+    /*
+        std::optional<cache_data_t> try_get(const key_t& key) &
+        {
+            std::lock_guard<std::mutex> lk(m_); //? seems like useless
 
-    std::optional<cache_data_t> try_get(const key_t& key) &
-    {
-        std::lock_guard<std::mutex> lk(m_);
+            auto dataIt = hash_.find(key);
+            if (dataIt == hash_.cend())
+                return std::nullopt;
 
-        auto dataIt = hash_.find(key);
-        if (dataIt == hash_.cend())
-            return std::nullopt;
-
-        data_.splice(data_.begin(), data_, dataIt->second);
-        return dataIt->second->second;
-    }
-
+            data_.splice(data_.begin(), data_, dataIt->second);
+            return dataIt->second->second;
+        }
+    */
 private:
     size_t                                    capacity_;
     std::list<key_data_t>                     data_;
